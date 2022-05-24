@@ -1,0 +1,1 @@
+/home/maciek/my_catkin_ws/devel/.private/rospy_tutorials/share/roseus/ros/rospy_tutorials/srv/BadTwoInts.l

@@ -1,0 +1,1 @@
+/home/maciek/my_catkin_ws/devel/.private/roscpp_tutorials/share/gennodejs/ros/roscpp_tutorials/srv/_index.js

@@ -1,0 +1,1 @@
+/home/maciek/my_catkin_ws/devel/.private/package_303770/share/common-lisp/ros/package_303770/msg/pose_actionGoal.lisp

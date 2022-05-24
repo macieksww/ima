@@ -1,0 +1,7 @@
+set(turtlesim_SETUP_PY_SETUP_MODULE "distutils.core")
+set(turtlesim_SETUP_PY_VERSION "0.10.2")
+set(turtlesim_SETUP_PY_SCRIPTS "scripts/sonar_emulator.py;scripts/siu_example.py")
+set(turtlesim_SETUP_PY_PACKAGES "TurtlesimSIU")
+set(turtlesim_SETUP_PY_PACKAGE_DIRS "src/TurtlesimSIU")
+set(turtlesim_SETUP_PY_MODULES "")
+set(turtlesim_SETUP_PY_MODULE_DIRS "")

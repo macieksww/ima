@@ -1,0 +1,8 @@
+prefix=/home/maciek/my_catkin_ws/devel/.private/package_303770
+
+Name: package_303770
+Description: Description of package_303770
+Version: 0.0.3
+Cflags: -I/home/maciek/my_catkin_ws/devel/.private/package_303770/include
+Libs: -L${prefix}/lib -lpackage_303770
+Requires: geometry_msgs nav_msgs rospy std_msgs actionlib_msgs message_runtime

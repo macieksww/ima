@@ -1,0 +1,16 @@
+[31m[1mCMake Error[0m at /home/maciek/my_catkin_ws/build/package_303770/cmake/package_303770-genmsg.cmake:3 (message):
+  Could not find messages which
+  '/home/maciek/my_catkin_ws/devel/.private/package_303770/share/package_303770/msg/pose_actionAction.msg'
+  depends on.  Did you forget to specify generate_messages(DEPENDENCIES ...)?
+
+  Cannot locate message [GoalID]: unknown package [actionlib_msgs] on search
+  path [{{'std_msgs': ['/opt/ros/melodic/share/std_msgs/cmake/../msg'],
+  'package_303770':
+  ['/home/maciek/my_catkin_ws/devel/.private/package_303770/share/package_303770/msg'],
+  'geometry_msgs': ['/opt/ros/melodic/share/geometry_msgs/cmake/../msg']}}]
+[36mCall Stack (most recent call first):[0m
+  /opt/ros/melodic/share/genmsg/cmake/genmsg-extras.cmake:307 (include)
+  CMakeLists.txt:73 (generate_messages)
+
+
+make: *** [cmake_check_build_system] Error 1

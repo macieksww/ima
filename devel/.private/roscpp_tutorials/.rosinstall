@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/maciek/my_catkin_ws/devel/.private/roscpp_tutorials/setup.sh

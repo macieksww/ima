@@ -1,0 +1,1 @@
+/home/maciek/my_catkin_ws/devel/.private/rospy_tutorials/lib/python2.7/dist-packages/rospy_tutorials/srv/_BadTwoInts.py

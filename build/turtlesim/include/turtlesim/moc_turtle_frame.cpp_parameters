@@ -1,0 +1,15 @@
+-I/home/maciek/my_catkin_ws/devel/.private/turtlesim/include
+-I/usr/include
+-I/usr/include/opencv
+-I/home/maciek/my_catkin_ws/src/ros_tutorials/turtlesim/include
+-I/opt/ros/melodic/include
+-I/opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp
+-I/usr/include
+-I/usr/include/opencv
+-I/usr/include
+-DROS_BUILD_SHARED_LIBS=1
+-DROS_PACKAGE_NAME="turtlesim"
+-DROSCONSOLE_BACKEND_LOG4CXX
+-o
+/home/maciek/my_catkin_ws/build/turtlesim/include/turtlesim/moc_turtle_frame.cpp
+/home/maciek/my_catkin_ws/src/ros_tutorials/turtlesim/include/turtlesim/turtle_frame.h

@@ -1,0 +1,8 @@
+<launch>
+    <arg name="dest_arg" default="dining" />
+    <param name="destination" type="str" value="$(arg dest_arg)" />
+    <param name="sectors" type="int" value="$(arg sect_arg)" />
+    <node name="client" pkg="package_303770" type="client.py" output="screen"/>
+    <!-- <node name="scan" pkg="package_303770" type="scan.py" output="screen"/> -->
+    <node name="vacuum" pkg="package_303770" type="vacuum.py" output="screen"/>
+</launch>

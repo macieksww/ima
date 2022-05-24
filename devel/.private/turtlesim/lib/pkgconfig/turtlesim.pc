@@ -1,0 +1,8 @@
+prefix=/home/maciek/my_catkin_ws/devel/.private/turtlesim
+
+Name: turtlesim
+Description: Description of turtlesim
+Version: 0.10.2
+Cflags: -I/home/maciek/my_catkin_ws/devel/.private/turtlesim/include
+Libs: -L${prefix}/lib 
+Requires: geometry_msgs message_runtime std_msgs std_srvs
