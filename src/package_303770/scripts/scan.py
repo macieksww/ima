@@ -8,14 +8,14 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import *
 from tf.transformations import euler_from_quaternion
-from package_303770.msg import ranges
+from package_303770.msg import _ranges
 
 
 class ScanServer:
     def __init__(self):
 
         self.scan_subscriber = rospy.Subscriber('/scan', LaserScan, self.subscriber_callback)
-        self.ranges_publisher = rospy.Publisher('/vacuum_sensors', ranges, queue_size=10)
+        self.ranges_publisher = rospy.Publisher('/vacuum_sensors', _ranges, queue_size=10)
         self.move_base
         self.n = rospy.get_param("/sectors")
 

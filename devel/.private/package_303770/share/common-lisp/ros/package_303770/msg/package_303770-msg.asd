@@ -20,4 +20,6 @@
     (:file "_package_pose_actionGoal" :depends-on ("_package"))
     (:file "pose_actionResult" :depends-on ("_package_pose_actionResult"))
     (:file "_package_pose_actionResult" :depends-on ("_package"))
+    (:file "ranges" :depends-on ("_package_ranges"))
+    (:file "_package_ranges" :depends-on ("_package"))
   ))

@@ -129,6 +129,10 @@ file(INSTALL DESTINATION "/home/maciek/my_catkin_ws/install" TYPE FILE FILES "/h
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/package_303770/msg" TYPE FILE FILES "/home/maciek/my_catkin_ws/src/package_303770/msg/ranges.msg")
+endif()
+
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/package_303770/action" TYPE FILE FILES "/home/maciek/my_catkin_ws/src/package_303770/action/pose_action.action")
 endif()
 

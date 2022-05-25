@@ -7,11 +7,13 @@ from math import pi, floor, atan2, sqrt, sin, cos
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import *
-from tf.transformations import euler_from_quaternion
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from package_303770.msg import ranges
 import actionlib
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from math import sin, cos, atan2, pi
+
+import datetime
 
 
 
@@ -21,8 +23,18 @@ class ScanServer:
         self.scan_subscriber = rospy.Subscriber('/vacuum_sensors', ranges, self.subscriber_callback)
         self.n = rospy.get_param("/sectors")
         self.destination = rospy.get_param("/destination")
-        self.d_room_crds = ([3.0, 0.5], [7.0, 0.5], [7.0, 4.5], [3.0, 4.5])
-        self.dest_crds = self.d_room_crds
+        self.crds_dict = {}
+        self.crds_dict['droom'] = ([3.0, 0.5], [7.0, 0.5], [7.0, 4.2], [3.0, 4.2])
+        self.crds_dict['kitchen'] = ([6.5, -1.0], [6.5, -4.5], [5.5, -4.5], [5.5, -0.5])
+        self.crds_dict['rubbish'] = ([1.75, 4.75], [1.75, 1.5], [0.5, 1.5], [0.5, 4.75])
+        self.crds_dict['lroom'] = ([-0.5, 0.5], [-0.5, 4.75], [-4.75, -4.75], [-4.75, 0.5])
+        self.crds_dict['office'] = ([-5.5, 4.5], [-5.5, 1.5], [-7.0, 1.5], [-7.0, 4.5])
+        self.crds_dict['bath'] = ([-5.5, 0.5], [-5.5, -3.5], [-7.0, -3.5], [-7.0, 0.5])
+        self.departure_time = datetime.datetime.now()
+        self.prev_departure_time = datetime.datetime.now()
+        self.elapsed_time = datetime.datetime.now()
+        self.cannot_reach_local_goal = False
+        self.visited_points = []
 
         self.clean()
 
@@ -60,6 +72,15 @@ class ScanServer:
         self.last_visited_corner = 0
         pt_ot = []
         while self.last_visited_corner < 4:
+            if self.last_visited_corner == 3:
+                self.dest_crds[0][0] += 0.5
+                self.dest_crds[1][0] -= 0.5
+                self.dest_crds[1][1] += 0.5
+                self.dest_crds[2][0] -= 0.5
+                self.dest_crds[2][1] -= 0.5
+                self.dest_crds[2][0] += 0.5
+                self.dest_crds[2][1] -= 0.5
+                
             self.list_of_points = self.generate_points(self.last_visited_corner)
             print("List of points: ")
             print(self.list_of_points)
@@ -74,76 +95,65 @@ class ScanServer:
                 if self.last_visited_corner == 1:
                     pt_ot.append(round(cos(0), 2))
                 if self.last_visited_corner == 2:
-                    pt_ot.append(round(cos(1.5*pi), 2))
+                    pt_ot.append(-100)
                 if self.last_visited_corner == 3:
                     pt_ot.append(round(cos(pi), 2))
 
                 print("Point/Orientation: ")
                 print(pt_ot)
-                self.move(pt_ot)
+                self.visited_points.append(pt_ot)
+                move_result = self.move(pt_ot)
             
             if self.last_visited_corner + 1 < 4:
                 self.last_visited_corner += 1
             else:
                 self.last_visited_corner = 0
 
-            if self.last_visited_corner == 3:
-                self.d_room_crds[0][1] += 0.5
-
-            # if self.last_visited_corner == 0:
-            #     self.d_room_crds[0][0] += 0.5
-            #     self.d_room_crds[1][0] -= 0.5
-            #     self.d_room_crds[1][1] += 0.5
-            #     self.d_room_crds[2][0] -= 0.5
-            #     self.d_room_crds[2][1] -= 0.5
-            #     self.d_room_crds[2][0] += 0.5
-            #     self.d_room_crds[2][1] -= 0.5
+            # zmniejszanie spirali po ktorej porusza sie robot
 
 
     
     def move_to_room(self):
 
         print("Destination: " + self.destination)
-        pos_bathroom = (-6.5, -2.0)
-        pos_cloakroom = (-6.5, 3.0)
-        pos_kitchen = (-3.0, 1.0)
-        pos_rubbish = (1.0, 3.0)
-        pos_dining_room = (3.0, 0.5)
-        pos_office = (6.5, -1.5)
-        dest = []
 
         if self.destination == "bathroom":
-            dest.extend(pos_bathroom)
+            self.dest_crds = self.crds_dict["bathroom"]
             print("Goal -> Bathroom configured")
 
-        elif self.destination == "cloakroom":
-            dest.extend(pos_cloakroom)
+        elif self.destination == "lroom":
+            self.dest_crds = self.crds_dict["lroom"]
             print("Goal -> Cloakroom configured")
 
         elif self.destination == "kitchen":
-            dest.extend(pos_kitchen)
+            self.dest_crds = self.crds_dict["kitchen"]
             print("Goal -> Kitchen configured")
 
         elif self.destination == "rubbish":
-            dest.extend(pos_rubbish)
+            self.dest_crds = self.crds_dict["rubbish"]
             print("Goal -> Rubbish configured")
 
-        elif self.destination == "dining":
-            dest.extend(pos_dining_room)
+        elif self.destination == "droom":
+            self.dest_crds = self.crds_dict["droom"]
+            dest = self.dest_crds[0]
+            dest.append(cos(0.5*pi))
             print("Goal -> Dining room configured")
 
         elif self.destination == "office":
-            dest.extend(pos_office)
+            self.dest_crds = self.crds_dict["office"]
             print("Goal -> Office configured")
         
         # addition of w-orientation
-        dest.append(cos(0.5*pi))
+        dest = self.dest_crds[0]
+        # dest.append(cos(0.5*pi))
+        # quaternion = quaternion_from_euler(0, 0, -1.5)
+        # dest.append(-100)
 
         print(dest[0], dest[1], dest[2])
-        self.move(dest)
+        self.move(dest, flag=1)
 
 
-    def move(self, dest):
+    def move(self, dest, flag=0):
 
         client = actionlib.SimpleActionClient('move_base',MoveBaseAction)
         client.wait_for_server()
@@ -158,19 +168,44 @@ class ScanServer:
 
 
         client.send_goal(goal)
-        wait = client.wait_for_result()
-        if not wait:
-            rospy.logerr("Action server not available!")
-            rospy.signal_shutdown("Action server not available!")
-        else:
-            return client.get_result()
+
+        # zadajemy 
+        if flag == 1:
+            wait = client.wait_for_result()
+            if not wait:
+                rospy.logerr("Action server not available!")
+                rospy.signal_shutdown("Action server not available!")
+            else:
+                return client.get_result()
+
+        elif flag == 0:
+            wait = client.wait_for_result(rospy.Duration(8))
+            if not wait:
+                print("Plan not found, heading to the next local goal.")
+                # rospy.logerr("Action server not available!")
+                # rospy.signal_shutdown("Action server not available!")
+                return 
+            else:
+                print("Plan found with given time constraints")
+                if self.departure_time:
+                    self.prev_departure_time = self.departure_time
+                self.departure_time = datetime.datetime.now()
+                self.elapsed_time = self.departure_time - self.prev_departure_time
+                self.elapsed_time = int(self.elapsed_time.total_seconds())
+                print("Time elapsed between 2 points:")
+                print(self.elapsed_time)
+
+                return client.get_result()
 
 
 
     def generate_points(self, last_visited_corner):
         step_size = 0.25
         stpt = self.dest_crds[last_visited_corner]
-        endpt = self.dest_crds[last_visited_corner+1]
+        if last_visited_corner != 3:
+            endpt = self.dest_crds[last_visited_corner+1]
+        else:
+            endpt = self.dest_crds[0]
         stpt_x = stpt[0]
         stpt_y = stpt[1]
         endpt_x = endpt[0]
