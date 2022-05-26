@@ -1,0 +1,5 @@
+<launch>
+    <arg name="sect_arg" default="5" />
+    <param name="sectors" type="int" value="$(arg sect_arg)" />
+    <node name="scan" pkg="package_303770" type="scan.py" output="screen"/>
+</launch>

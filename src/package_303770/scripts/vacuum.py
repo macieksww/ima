@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # license removed for brevity
+from telnetlib import STATUS
 import rospy
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
@@ -10,6 +11,7 @@ from geometry_msgs.msg import *
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from package_303770.msg import ranges
 import actionlib
+from actionlib_msgs.msg import GoalStatus
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from math import sin, cos, atan2, pi
 
@@ -21,11 +23,12 @@ class ScanServer:
     def __init__(self):
 
         self.scan_subscriber = rospy.Subscriber('/vacuum_sensors', ranges, self.subscriber_callback)
+        self.nav_status_subscriber = rospy.Subscriber('/move_base/status', GoalStatus, self.nav_status_subscriber_callback)
         self.n = rospy.get_param("/sectors")
         self.destination = rospy.get_param("/destination")
         self.crds_dict = {}
         self.crds_dict['droom'] = ([3.0, 0.5], [7.0, 0.5], [7.0, 4.2], [3.0, 4.2])
-        self.crds_dict['kitchen'] = ([6.5, -1.0], [6.5, -4.5], [5.5, -4.5], [5.5, -0.5])
+        self.crds_dict['kitchen'] = ([5.5, -4.5], [6.5, -4.5], [5.5, -1.0], [6.5, -1.0])
         self.crds_dict['rubbish'] = ([1.75, 4.75], [1.75, 1.5], [0.5, 1.5], [0.5, 4.75])
         self.crds_dict['lroom'] = ([-0.5, 0.5], [-0.5, 4.75], [-4.75, -4.75], [-4.75, 0.5])
         self.crds_dict['office'] = ([-5.5, 4.5], [-5.5, 1.5], [-7.0, 1.5], [-7.0, 4.5])
@@ -64,6 +67,13 @@ class ScanServer:
 
         self.publisher()
 
+    def nav_status_subscriber_callback(self, msg):
+        print("Navigation status:")
+        print(msg)
+        # status_list = msg['status_list']
+        # status = status_list['status']
+        # return status
+
     def clean (self):
         self.move_to_room_result = self.move_to_room()
 
@@ -73,13 +83,13 @@ class ScanServer:
         pt_ot = []
         while self.last_visited_corner < 4:
             if self.last_visited_corner == 3:
-                self.dest_crds[0][0] += 0.5
-                self.dest_crds[1][0] -= 0.5
-                self.dest_crds[1][1] += 0.5
-                self.dest_crds[2][0] -= 0.5
-                self.dest_crds[2][1] -= 0.5
-                self.dest_crds[2][0] += 0.5
-                self.dest_crds[2][1] -= 0.5
+                self.dest_crds[0][0] += 0.25
+                self.dest_crds[1][0] -= 0.25
+                self.dest_crds[1][1] += 0.25
+                self.dest_crds[2][0] -= 0.25
+                self.dest_crds[2][1] -= 0.25
+                self.dest_crds[3][0] += 0.25
+                self.dest_crds[3][1] -= 0.25
                 
             self.list_of_points = self.generate_points(self.last_visited_corner)
             print("List of points: ")
@@ -135,22 +145,20 @@ class ScanServer:
 
         elif self.destination == "droom":
             self.dest_crds = self.crds_dict["droom"]
-            dest = self.dest_crds[0]
-            dest.append(cos(0.5*pi))
             print("Goal -> Dining room configured")
 
         elif self.destination == "office":
             self.dest_crds = self.crds_dict["office"]
             print("Goal -> Office configured")
         
-        # addition of w-orientation
         dest = self.dest_crds[0]
-        # dest.append(cos(0.5*pi))
+        dest.append(cos(0.5*pi))
+        # addition of w-orientation
         # quaternion = quaternion_from_euler(0, 0, -1.5)
-        # dest.append(-100)
 
         print(dest[0], dest[1], dest[2])
         self.move(dest, flag=1)
+        print()
 
 
     def move(self, dest, flag=0):
@@ -168,34 +176,41 @@ class ScanServer:
 
 
         client.send_goal(goal)
+        wait = client.wait_for_result()
+        if not wait:
+            rospy.logerr("Action server not available!")
+            rospy.signal_shutdown("Action server not available!")
+        else:
+            return client.get_result()
 
-        # zadajemy 
-        if flag == 1:
-            wait = client.wait_for_result()
-            if not wait:
-                rospy.logerr("Action server not available!")
-                rospy.signal_shutdown("Action server not available!")
-            else:
-                return client.get_result()
+        # # zadajemy 
+        # if flag == 1:
+        #     wait = client.wait_for_result()
+        #     if not wait:
+        #         rospy.logerr("Action server not available!")
+        #         rospy.signal_shutdown("Action server not available!")
+        #     else:
+        #         return client.get_result()
 
-        elif flag == 0:
-            wait = client.wait_for_result(rospy.Duration(8))
-            if not wait:
-                print("Plan not found, heading to the next local goal.")
-                # rospy.logerr("Action server not available!")
-                # rospy.signal_shutdown("Action server not available!")
-                return 
-            else:
-                print("Plan found with given time constraints")
-                if self.departure_time:
-                    self.prev_departure_time = self.departure_time
-                self.departure_time = datetime.datetime.now()
-                self.elapsed_time = self.departure_time - self.prev_departure_time
-                self.elapsed_time = int(self.elapsed_time.total_seconds())
-                print("Time elapsed between 2 points:")
-                print(self.elapsed_time)
+        # # elif flag == 0:
+        # #     wait = client.wait_for_result(rospy.Duration(8))
+        # #     if not wait:
+        # #         print("Plan not found, heading to the next local goal.")
+        # #         # rospy.logerr("Action server not available!")
+        # #         # rospy.signal_shutdown("Action server not available!")
+        # #         return 
+        #     else:
+        #         print("Plan found with given time constraints")
+        #         if self.departure_time:
+        #             self.prev_departure_time = self.departure_time
+        #         self.departure_time = datetime.datetime.now()
+        #         self.elapsed_time = self.departure_time - self.prev_departure_time
+        #         self.elapsed_time = int(self.elapsed_time.total_seconds())
+        #         print("Time elapsed between 2 points:")
+        #         print(self.elapsed_time)
 
-                return client.get_result()
+        #         return client.get_result()
+    
 
 
 

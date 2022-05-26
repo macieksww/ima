@@ -1,5 +1,5 @@
 <launch>
     <arg name="dest_arg" default="dining" />
     <param name="destination" type="str" value="$(arg dest_arg)" />
-    <node name="vacuum" pkg="package_303770" type="vacuum.py" output="screen"/>
+    <node name="client" pkg="package_303770" type="client.py" output="screen"/>
 </launch>
