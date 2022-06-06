@@ -20,12 +20,10 @@ import datetime
 
 
 class Vacuum:
-    def __init__(self):
+    def __init__(self, room):
 
-        # self.scan_subscriber = rospy.Subscriber('/vacuum_sensors', ranges, self.subscriber_callback)
         self.nav_status_subscriber = rospy.Subscriber('/move_base/status', GoalStatusArray, self.nav_status_subscriber_callback)
-        # self.n = rospy.get_param("/sectors")
-        self.destination = rospy.get_param("/destination")
+        self.destination = room
         self.crds_dict = {}
 
         # wspolrzedne wierzcholkow poszczegolnych pokoi
